@@ -82,6 +82,22 @@ const migrateMembers = (members: (Member & { group?: string })[]): Member[] => {
   });
 };
 
+// Load shared data from public/data.json
+const loadSharedData = async (): Promise<{ members: Member[]; records: AttendanceRecord[] } | null> => {
+  try {
+    const response = await fetch('/data.json');
+    if (response.ok) {
+      const data = await response.json();
+      if (data.members && Array.isArray(data.members) && data.members.length > 0) {
+        return data;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load shared data:', error);
+  }
+  return null;
+};
+
 export const useAttendance = () => {
   const [members, setMembers] = useState<Member[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY_MEMBERS);
@@ -98,6 +114,21 @@ export const useAttendance = () => {
     const saved = localStorage.getItem(STORAGE_KEY_RECORDS);
     return saved ? JSON.parse(saved) : [];
   });
+
+  // Load shared data on mount if localStorage is empty
+  useEffect(() => {
+    const initializeData = async () => {
+      // Only load if localStorage is empty
+      if (!localStorage.getItem(STORAGE_KEY_MEMBERS)) {
+        const sharedData = await loadSharedData();
+        if (sharedData && sharedData.members.length > 0) {
+          setMembers(sharedData.members);
+          setRecords(sharedData.records || []);
+        }
+      }
+    };
+    initializeData();
+  }, []);
 
   // Save to localStorage
   useEffect(() => {

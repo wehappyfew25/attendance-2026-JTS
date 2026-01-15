@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload, Cloud } from 'lucide-react';
 import { exportToExcel, importFromExcel, ImportResult } from '@/utils/excelUtils';
 import { Member, AttendanceRecord, AttendanceStatus, WeekInfo } from '@/types/attendance';
 import { toast } from 'sonner';
@@ -41,6 +41,23 @@ export const ExcelButtons = ({
     } catch (error) {
       toast.error('내보내기에 실패했습니다');
       console.error('Export error:', error);
+    }
+  };
+
+  const handleSaveToServer = async () => {
+    try {
+      const dataToSave = {
+        members,
+        records,
+      };
+      
+      // Copy to clipboard as JSON (alternative to server storage)
+      const jsonString = JSON.stringify(dataToSave, null, 2);
+      await navigator.clipboard.writeText(jsonString);
+      toast.success('데이터가 클립보드에 복사되었습니다. (public/data.json에 저장 필요)');
+    } catch (error) {
+      toast.error('클립보드 복사에 실패했습니다');
+      console.error('Error:', error);
     }
   };
 
@@ -84,6 +101,10 @@ export const ExcelButtons = ({
         <Button variant="outline" size="sm" className="gap-2" onClick={handleImportClick}>
           <Upload className="w-4 h-4" />
           가져오기
+        </Button>
+        <Button variant="outline" size="sm" className="gap-2" onClick={handleSaveToServer}>
+          <Cloud className="w-4 h-4" />
+          서버에 저장
         </Button>
         <input
           ref={fileInputRef}
