@@ -51,12 +51,21 @@ export const ExcelButtons = ({
         records,
       };
       
-      // Copy to clipboard as JSON (alternative to server storage)
+      // Create and download JSON file
       const jsonString = JSON.stringify(dataToSave, null, 2);
-      await navigator.clipboard.writeText(jsonString);
-      toast.success('데이터가 클립보드에 복사되었습니다. (public/data.json에 저장 필요)');
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'data.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast.success('data.json이 다운로드되었습니다. public 폴더에 덮어쓰고 git push 하세요.');
     } catch (error) {
-      toast.error('클립보드 복사에 실패했습니다');
+      toast.error('저장에 실패했습니다');
       console.error('Error:', error);
     }
   };
