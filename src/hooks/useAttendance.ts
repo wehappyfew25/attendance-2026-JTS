@@ -4,7 +4,7 @@ import { Member, AttendanceRecord, AttendanceStatus, TEAM_NAMES, CELL_NAMES } fr
 const STORAGE_KEY_MEMBERS = 'church-attendance-members';
 const STORAGE_KEY_RECORDS = 'church-attendance-records';
 
-// Generate 180 members with Korean names
+// Generate 200 members with Korean names
 const generateDefaultMembers = (): Member[] => {
   const lastNames = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임', '한', '오', '서', '신', '권', '황', '안', '송', '류', '홍'];
   const firstNameParts1 = ['영', '민', '수', '지', '현', '승', '태', '준', '성', '도', '재', '유', '혜', '서', '윤', '예', '시', '하', '은', '소'];
@@ -13,7 +13,7 @@ const generateDefaultMembers = (): Member[] => {
   const members: Member[] = [];
   const usedNames = new Set<string>();
 
-  for (let i = 0; i < 180; i++) {
+  for (let i = 0; i < 200; i++) {
     let name: string;
     do {
       const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
@@ -24,8 +24,9 @@ const generateDefaultMembers = (): Member[] => {
     
     usedNames.add(name);
     
-    // Distribute into 12 teams (15 people per team), each team has 3 cells (5 people per cell)
-    const teamIndex = Math.floor(i / 15);
+    // Distribute into 5 teams cyclically (200 people with flexible cells)
+    // Each round: 15 people per team, 3 cells per team, 5 people per cell
+    const teamIndex = Math.floor(i / 15) % TEAM_NAMES.length;
     const cellIndex = Math.floor((i % 15) / 5);
     
     members.push({
@@ -88,10 +89,6 @@ export const useAttendance = () => {
       const parsed = JSON.parse(saved);
       // Migrate old data format
       const migrated = migrateMembers(parsed);
-      // If old data has less than 180 members, regenerate
-      if (migrated.length < 180) {
-        return generateDefaultMembers();
-      }
       return migrated;
     }
     return generateDefaultMembers();
@@ -110,6 +107,31 @@ export const useAttendance = () => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
   }, [records]);
+
+  // Listen for storage changes from other tabs
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY_MEMBERS && e.newValue) {
+        try {
+          const newMembers = JSON.parse(e.newValue);
+          setMembers(newMembers);
+        } catch (error) {
+          console.error('Failed to parse members from storage:', error);
+        }
+      }
+      if (e.key === STORAGE_KEY_RECORDS && e.newValue) {
+        try {
+          const newRecords = JSON.parse(e.newValue);
+          setRecords(newRecords);
+        } catch (error) {
+          console.error('Failed to parse records from storage:', error);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const addMember = useCallback((name: string, team?: string, cell?: string) => {
     const newMember: Member = {

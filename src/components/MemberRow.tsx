@@ -13,6 +13,8 @@ interface MemberRowProps {
   stats: { present: number; absent: number; rate: number };
   onRemove: () => void;
   onEdit: () => void;
+  isNewTeam?: boolean;
+  isNewCell?: boolean;
 }
 
 export const MemberRow = ({
@@ -23,14 +25,24 @@ export const MemberRow = ({
   stats,
   onRemove,
   onEdit,
+  isNewTeam = false,
+  isNewCell = false,
 }: MemberRowProps) => {
   const teamCellDisplay = member.team && member.cell 
     ? `${member.team} ${member.cell}` 
     : member.team || member.cell || '';
 
   return (
-    <tr className="group hover:bg-accent/50 transition-colors">
-      <td className="sticky left-0 z-10 bg-card group-hover:bg-accent/50 transition-colors border-r border-border px-4 py-3">
+    <tr className={cn(
+      "group hover:bg-accent/50 transition-colors",
+      isNewTeam && "border-t-2 border-t-muted-foreground/40",
+      !isNewTeam && isNewCell && "border-t border-t-border"
+    )}>
+      <td className={cn(
+        "sticky left-0 z-10 bg-card group-hover:bg-accent/50 transition-colors border-r border-border px-4 py-3",
+        isNewTeam && "border-t-2 border-t-muted-foreground/40",
+        !isNewTeam && isNewCell && "border-t border-t-border"
+      )}>
         <div className="flex items-center gap-2 min-w-[160px]">
           <div className="flex-1">
             <div className="font-medium text-foreground">{member.name}</div>
@@ -66,7 +78,11 @@ export const MemberRow = ({
         </td>
       ))}
       
-      <td className="sticky right-0 z-10 bg-card group-hover:bg-accent/50 transition-colors border-l border-border px-4 py-3">
+      <td className={cn(
+        "sticky right-0 z-10 bg-card group-hover:bg-accent/50 transition-colors border-l border-border px-4 py-3",
+        isNewTeam && "border-t-2 border-t-muted-foreground/40",
+        !isNewTeam && isNewCell && "border-t border-t-border"
+      )}>
         <div className="flex items-center gap-3 min-w-[120px]">
           <div className="flex-1 text-sm">
             <div className="font-medium">

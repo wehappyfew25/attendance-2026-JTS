@@ -3,7 +3,7 @@ export type AttendanceStatus = 'present' | 'absent';
 export interface Member {
   id: string;
   name: string;
-  team?: string;  // 예: "모세팀"
+  team?: string;  // 예: "홀리웨이브"
   cell?: string;  // 예: "1셀"
 }
 

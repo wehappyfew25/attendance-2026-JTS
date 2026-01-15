@@ -18,6 +18,10 @@ const Index = () => {
     records, 
     addMember, 
     getAttendance, 
+    toggleAttendance,
+    getMemberStats,
+    removeMember,
+    updateMember,
     getLongAbsentees,
     importData 
   } = useAttendance();
@@ -42,7 +46,7 @@ const Index = () => {
 
   const longAbsentees = useMemo(() => {
     return getLongAbsentees(currentWeek, 4);
-  }, [getLongAbsentees, currentWeek]);
+  }, [getLongAbsentees, currentWeek, records]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,7 +83,14 @@ const Index = () => {
           {/* Table */}
           <AttendanceTable 
             weeks={weeks} 
-            selectedMonth={selectedMonth} 
+            selectedMonth={selectedMonth}
+            members={members}
+            records={records}
+            getAttendance={getAttendance}
+            toggleAttendance={toggleAttendance}
+            getMemberStats={getMemberStats}
+            removeMember={removeMember}
+            updateMember={updateMember}
           />
 
           {/* Long Absentee List */}
